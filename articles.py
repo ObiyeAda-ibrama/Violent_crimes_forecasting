@@ -155,21 +155,33 @@ def articles_card():
         st.page_link("articles.py", label="Articles", icon=":material/articles:")
 
         df = st.session_state.get("articles_df")
+        columns_to_show = ["Name", "Created", "Modified", "Load", "Link"]
+
         if df is None:
             st.write("Article records file not found.")
             return
 
-        if df.empty or "Name" not in df.columns:
+        # Names list
+        if "Name" in df.columns:
+            names_series = df["Name"].dropna().astype(str).drop_duplicates()
+            if names_series.empty:
+                st.write("No articles have been generated yet.")
+            else:
+                for article_name in names_series.tolist():
+                    st.markdown(f"- {article_name}")
+        else:
             st.write("No articles have been generated yet.")
-            return
 
-        names_series = df["Name"].dropna().astype(str).drop_duplicates()
-        if names_series.empty:
-            st.write("No articles have been generated yet.")
-            return
-
-        for article_name in names_series.tolist():
-            st.markdown(f"- {article_name}")
+        # Always display the dataframe if available (even if empty)
+        df_to_show = df.copy()
+        for col in columns_to_show:
+            if col not in df_to_show.columns:
+                df_to_show[col] = None
+        st.dataframe(
+            df_to_show[columns_to_show],
+            use_container_width=True,
+            hide_index=True,
+        )
 
 
 if __name__ == "__main__":
