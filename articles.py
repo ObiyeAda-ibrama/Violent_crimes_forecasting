@@ -144,6 +144,34 @@ def main():
         st.info("No results yet. Enter a query and click Search.")
 
 
+def articles_card():
+    """Display a card with article names from the session dataframe.
+
+    - If the dataframe is not found in session state -> show "Article records file not found."
+    - If the dataframe exists but has no rows -> show "No articles have been generated yet."
+    - Otherwise, show a list of article names and a link to the Articles page.
+    """
+    with st.container():
+        st.page_link("articles.py", label="Articles", icon=":material/articles:")
+
+        df = st.session_state.get("articles_df")
+        if df is None:
+            st.write("Article records file not found.")
+            return
+
+        if df.empty or "Name" not in df.columns:
+            st.write("No articles have been generated yet.")
+            return
+
+        names_series = df["Name"].dropna().astype(str).drop_duplicates()
+        if names_series.empty:
+            st.write("No articles have been generated yet.")
+            return
+
+        for article_name in names_series.tolist():
+            st.markdown(f"- {article_name}")
+
+
 if __name__ == "__main__":
     main()
 
